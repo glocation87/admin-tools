@@ -1,33 +1,33 @@
 package com.github.glocation87.manager;
 
-import com.github.glocation87.AdminToolPlugin;
-import com.github.glocation87.util.ColorCodes;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import com.github.glocation87.AdminToolPlugin;
+
 public class InventoryManager {
     private final AdminToolPlugin plugin;
     private final Map<UUID, PlayerInventoryState> playerInventoryCache = new HashMap<>();
-    
+
     public InventoryManager(AdminToolPlugin _plugin) {
         this.plugin = _plugin;
     }
 
-    private ItemStack createCustomItem(Material material, String name, String id, String color, boolean enchant) {
+    private ItemStack createCustomItem(Material material, String name, String id, ChatColor color, boolean enchant) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§l§" + ColorCodes.getColorCode(color) + name);
+        meta.setDisplayName(color + "§l" + name);
         if (enchant == true) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -66,7 +66,8 @@ public class InventoryManager {
 
     public void cachePlayerInventory(Player player) {
         UUID playerId = player.getUniqueId();
-        PlayerInventoryState state = new PlayerInventoryState(player.getInventory().getContents(), player.getInventory().getArmorContents());
+        PlayerInventoryState state = new PlayerInventoryState(player.getInventory().getContents(),
+                player.getInventory().getArmorContents());
         playerInventoryCache.put(playerId, state);
         player.getInventory().clear();
     }
@@ -81,10 +82,12 @@ public class InventoryManager {
     }
 
     public void applyModerationTools(Player player) {
-        player.getInventory().setItem(0, createCustomItem(Material.ENCHANTED_BOOK, "Player List", "player_list", "CYAN", true));
-        player.getInventory().setItem(1, createCustomItem(Material.DIAMOND_PICKAXE, "Moderation Tool", "moderation_tool", "RED", true));
-        player.getInventory().setItem(2, createCustomItem(Material.COMPASS, "Teleport", "teleport", "PURPLE", false));
+        player.getInventory().setItem(0,
+                createCustomItem(Material.ENCHANTED_BOOK, "Player List", "player_list", ChatColor.DARK_PURPLE, true));
+        player.getInventory().setItem(1,
+                createCustomItem(Material.DIAMOND_PICKAXE, "Moderation Tool", "moderation_tool", ChatColor.DARK_GREEN,
+                        true));
+        player.getInventory().setItem(2,
+                createCustomItem(Material.COMPASS, "Teleport", "teleport", ChatColor.YELLOW, false));
     }
-
-
 }

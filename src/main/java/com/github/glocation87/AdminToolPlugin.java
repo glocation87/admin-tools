@@ -5,6 +5,7 @@ import com.github.glocation87.manager.InventoryManager;
 import com.github.glocation87.manager.GamemodeManager;
 import com.github.glocation87.events.StaffItemListener;
 import com.github.glocation87.events.StaffModeListener;
+import com.github.glocation87.events.PlayerInteractListener;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -36,11 +37,12 @@ public class AdminToolPlugin extends JavaPlugin
 
     @Override
     public void onDisable() {
-        getLogger().info("See you again, SpigotMC!");
     }
+
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new StaffModeListener(this), this);
         getServer().getPluginManager().registerEvents(new StaffItemListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
     }
 
     private void registerCommands() {
@@ -60,7 +62,7 @@ public class AdminToolPlugin extends JavaPlugin
     }
 
     public boolean isStaffItem(ItemStack item) {
-        if (item.hasItemMeta()) {
+        if (item != null && item.hasItemMeta()) {
             NamespacedKey key = new NamespacedKey(this, "staff_item");
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(key, PersistentDataType.STRING)) {
@@ -71,6 +73,18 @@ public class AdminToolPlugin extends JavaPlugin
             }
         }
         return false;
+    }
+
+    public String getItemId(ItemStack item) {
+        if (isStaffItem(item)) {
+            NamespacedKey key = new NamespacedKey(this, "staff_item");
+            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            if (container.has(key, PersistentDataType.STRING)) {
+                String id = container.get(key, PersistentDataType.STRING);
+                return id;
+            }
+        }
+        return null;
     }
 
     public InventoryManager getInventoryManager() {
