@@ -1,0 +1,9 @@
+com\github\glocation87\manager\InventoryManager$PlayerInventoryState.class
+com\github\glocation87\commands\StaffCommand.class
+com\github\glocation87\events\StaffModeListener.class
+com\github\glocation87\manager\GamemodeManager.class
+com\github\glocation87\AdminToolPlugin.class
+com\github\glocation87\events\StaffItemListener.class
+com\github\glocation87\events\PlayerInteractListener.class
+com\github\glocation87\manager\InventoryManager.class
+com\github\glocation87\util\ColorCodes.class
