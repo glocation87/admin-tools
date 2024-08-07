@@ -2,15 +2,16 @@ package com.github.glocation87;
 
 import com.github.glocation87.commands.StaffCommand;
 import com.github.glocation87.manager.InventoryManager;
+import com.github.glocation87.manager.GamemodeManager;
+import com.github.glocation87.events.StaffItemListener;
+import com.github.glocation87.events.StaffModeListener;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import com.github.glocation87.manager.GamemodeManager;
-import com.github.glocation87.events.StaffItemListener;
-import com.github.glocation87.events.StaffModeListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -60,7 +61,7 @@ public class AdminToolPlugin extends JavaPlugin
 
     public boolean isStaffItem(ItemStack item) {
         if (item.hasItemMeta()) {
-            NamespacedKey key = new NamespacedKey(plugin, "staff_item");
+            NamespacedKey key = new NamespacedKey(this, "staff_item");
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(key, PersistentDataType.STRING)) {
                 String id = container.get(key, PersistentDataType.STRING);
