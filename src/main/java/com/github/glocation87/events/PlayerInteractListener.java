@@ -26,7 +26,7 @@ public class PlayerInteractListener implements Listener {
             if (playerAction.contains("RIGHT_CLICK") && plugin.isStaffItem(playerItem)) {
                 switch (plugin.getItemId(playerItem)) {
                     case "player_list":
-                        PlayerListManager.openPlayerListUI(player, 1);
+                        PlayerListManager.openPlayerListUI(player, 0);
                         break;
                     default:
                         break;

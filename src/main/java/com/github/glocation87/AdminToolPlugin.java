@@ -3,7 +3,6 @@ package com.github.glocation87;
 import com.github.glocation87.commands.StaffCommand;
 import com.github.glocation87.manager.InventoryManager;
 import com.github.glocation87.manager.GamemodeManager;
-import com.github.glocation87.events.StaffItemListener;
 import com.github.glocation87.events.StaffModeListener;
 import com.github.glocation87.events.PlayerInteractListener;
 
@@ -18,9 +17,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+public class AdminToolPlugin extends JavaPlugin {
 
-public class AdminToolPlugin extends JavaPlugin
-{
     private InventoryManager inventoryManager;
     private GamemodeManager gamemodeManager;
     private Set<UUID> staffModePlayers;
@@ -41,7 +39,6 @@ public class AdminToolPlugin extends JavaPlugin
 
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new StaffModeListener(this), this);
-        getServer().getPluginManager().registerEvents(new StaffItemListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
     }
 
@@ -67,9 +64,9 @@ public class AdminToolPlugin extends JavaPlugin
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(key, PersistentDataType.STRING)) {
                 String id = container.get(key, PersistentDataType.STRING);
-                return id.equals("player_list") 
-                    || id.equals("moderation_tool") 
-                    || id.equals("teleport");
+                return id.equals("player_list")
+                        || id.equals("moderation_tool")
+                        || id.equals("teleport");
             }
         }
         return false;

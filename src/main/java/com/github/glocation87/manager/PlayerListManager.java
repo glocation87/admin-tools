@@ -6,25 +6,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.Inventory;
 
+import com.github.glocation87.util.CustomInventory;
 import com.github.glocation87.util.CustomInventoryHolder;
+import com.github.glocation87.manager.PlayerProfileManager;
 
 public class PlayerListManager {
+
     private static final int SLOTS_COUNT = 5;
-    private static final int PLAYERS_PER_PAGE = 21;
-    private static final String TITLE = ChatColor.GOLD + "§l§k|||§r§l" + "  §lPlayer List  " + "§l§k|||§r§l";
+    private static final String TITLE = "      §l§k|||§r§l" + "  §lPlayer List  " + "§l§k|||§r§l";
     private static final CustomInventoryHolder HOLDER = new CustomInventoryHolder("player_list");
-    private static List<ItemStack> dummyPlayers;
-    private static Map<Player, Integer> playerPages = new HashMap<>();
+    private static final List<ItemStack> dummyPlayers;
+    private static final Map<Player, Integer> playerPages = new HashMap<>();
 
     // Initialize dummy players for testing
     static {
@@ -35,8 +36,9 @@ public class PlayerListManager {
             skullMeta.setDisplayName(ChatColor.YELLOW + "§lDummyPlayer" + i);
 
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "UUID: " + UUID.randomUUID().toString());
-            lore.add(ChatColor.GRAY + "Ping: " + (int) (Math.random() * 100) + "ms");
+            lore.add(ChatColor.GRAY + "UUID: " + ChatColor.GREEN + UUID.randomUUID().toString());
+            lore.add(ChatColor.GRAY + "Ping: " + ChatColor.GREEN + (int) (Math.random() * 100) + "ms");
+            lore.add(ChatColor.GRAY + "Rank: " + ChatColor.GREEN + "Member");
             skullMeta.setLore(lore);
 
             playerHead.setItemMeta(skullMeta);
@@ -45,23 +47,11 @@ public class PlayerListManager {
     }
 
     public static void openPlayerListUI(Player player, int page) {
-        Inventory playerListInventory = Bukkit.createInventory(HOLDER, SLOTS_COUNT * 9, TITLE);
-
-        // Fill the borders with colored glass panes
-        ItemStack glassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE, 1);
-        ItemMeta glassMeta = glassPane.getItemMeta();
-        glassMeta.setDisplayName(" ");
-        glassPane.setItemMeta(glassMeta);
-
-        for (int i = 0; i < SLOTS_COUNT * 9; i++) {
-            if (i < 9 || i >= SLOTS_COUNT * 9 - 9 || i % 9 == 0 || i % 9 == 8) {
-                playerListInventory.setItem(i, glassPane);
-            }
-        }
+        CustomInventory playerListInventory = new CustomInventory(HOLDER, SLOTS_COUNT, TITLE);
 
         // Add player heads
-        int startIndex = page * PLAYERS_PER_PAGE;
-        int endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, dummyPlayers.size());
+        int startIndex = page * playerListInventory.getAvailableSlots();
+        int endIndex = Math.min(startIndex + playerListInventory.getAvailableSlots(), dummyPlayers.size());
 
         for (int i = startIndex; i < endIndex; i++) {
             int slotNumber = 10 + (i - startIndex) % 7 + ((i - startIndex) / 7) * 9;
@@ -70,40 +60,51 @@ public class PlayerListManager {
 
         // Add navigation buttons
         if (page > 0) {
-            ItemStack previousPage = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-            ItemMeta previousMeta = previousPage.getItemMeta();
-            previousMeta.setDisplayName(ChatColor.GREEN + "Previous Page");
-            previousPage.setItemMeta(previousMeta);
-            playerListInventory.setItem(SLOTS_COUNT * 9 - 9, previousPage);
+            int slotNumber = SLOTS_COUNT * 9 - 9;
+            playerListInventory.addInventoryItem(Material.RED_STAINED_GLASS_PANE, ChatColor.GREEN + "Previous Page", slotNumber);
         }
 
         if (endIndex < dummyPlayers.size()) {
-            ItemStack nextPage = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-            ItemMeta nextMeta = nextPage.getItemMeta();
-            nextMeta.setDisplayName(ChatColor.GREEN + "Next Page");
-            nextPage.setItemMeta(nextMeta);
-            playerListInventory.setItem(SLOTS_COUNT * 9 - 1, nextPage);
+            int slotNumber = SLOTS_COUNT * 9 - 1;
+            playerListInventory.addInventoryItem(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Next Page", slotNumber);
         }
 
         playerPages.put(player, page);
-        player.openInventory(playerListInventory);
+        player.openInventory(playerListInventory.getInventory());
     }
 
     public static void handleInventoryClick(Player player, InventoryHolder inventoryHolder, int slot) {
-        CustomInventoryHolder holder = (CustomInventoryHolder) inventoryHolder;
-        if (holder != null && !"player_list".equals(holder.getIdentifier()))
-            return;
+        if (!(inventoryHolder instanceof CustomInventoryHolder)) return;
 
+        CustomInventoryHolder holder = (CustomInventoryHolder) inventoryHolder;
+        if (!"player_list".equals(holder.getIdentifier())) return;
+
+        Inventory playerInventory = holder.getInventory();
+        if (playerInventory == null || slot >= playerInventory.getSize()) {
+            System.out.println("Invalid slot: " + slot);
+            return;
+        }
+
+        ItemStack item = playerInventory.getItem(slot);
+        if (item == null) {
+            System.out.println("No item found in slot: " + slot);
+            return;
+        }
+
+        ItemMeta itemMeta = item.getItemMeta();
+        String itemName = ChatColor.stripColor(itemMeta.getDisplayName());
+        Material itemMaterial = item.getType();
         int currentPage = playerPages.getOrDefault(player, 0);
 
-        if (slot == SLOTS_COUNT * 9 - 9 && currentPage > 0) {
-            // Previous page button clicked
+        if (itemMaterial == Material.PLAYER_HEAD) {
+            player.closeInventory();
+            PlayerProfileManager.openPlayerMenuUI(player, itemMeta.getDisplayName(), UUID.randomUUID());
+        } else if ("Previous Page".equals(itemName) && currentPage > 0) {
             currentPage--;
             playerPages.put(player, currentPage);
             player.closeInventory();
             openPlayerListUI(player, currentPage);
-        } else if (slot == SLOTS_COUNT * 9 - 1 && (currentPage + 1) * PLAYERS_PER_PAGE < dummyPlayers.size()) {
-            // Next page button clicked
+        } else if ("Next Page".equals(itemName) && (currentPage + 1) * 21 < dummyPlayers.size()) {
             currentPage++;
             playerPages.put(player, currentPage);
             player.closeInventory();

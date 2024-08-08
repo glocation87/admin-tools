@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import com.github.glocation87.AdminToolPlugin;
 
 public class InventoryManager {
+
     private final AdminToolPlugin plugin;
     private final Map<UUID, PlayerInventoryState> playerInventoryCache = new HashMap<>();
 
@@ -39,6 +40,7 @@ public class InventoryManager {
     }
 
     private static class PlayerInventoryState {
+
         private final ItemStack[] contents;
         private final ItemStack[] armorContents;
 
@@ -83,11 +85,11 @@ public class InventoryManager {
 
     public void applyModerationTools(Player player) {
         player.getInventory().setItem(0,
-                createCustomItem(Material.ENCHANTED_BOOK, "Player List", "player_list", ChatColor.DARK_PURPLE, true));
+                createCustomItem(Material.ENCHANTED_BOOK, "Player List", "player_list", ChatColor.LIGHT_PURPLE, true));
         player.getInventory().setItem(1,
-                createCustomItem(Material.DIAMOND_PICKAXE, "Moderation Tool", "moderation_tool", ChatColor.DARK_GREEN,
+                createCustomItem(Material.DIAMOND_PICKAXE, "Moderation Tool", "moderation_tool", ChatColor.GREEN,
                         true));
         player.getInventory().setItem(2,
-                createCustomItem(Material.COMPASS, "Teleport", "teleport", ChatColor.YELLOW, false));
+                createCustomItem(Material.COMPASS, "Teleport", "teleport", ChatColor.AQUA, false));
     }
 }

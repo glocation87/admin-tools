@@ -35,6 +35,7 @@
   </dependencies>
 
   <build>
+    <directory>C:\Users\ryan\OneDrive\Desktop\server\plugins</directory>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
@@ -58,6 +59,9 @@
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
+          <configuration>
+            <outputDirectory>C:\Users\ryan\OneDrive\Desktop\server\plugins</outputDirectory>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>

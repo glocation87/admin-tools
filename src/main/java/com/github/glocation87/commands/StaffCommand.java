@@ -1,9 +1,5 @@
 package com.github.glocation87.commands;
 
-import com.github.glocation87.AdminToolPlugin;
-import com.github.glocation87.manager.InventoryManager;
-import com.github.glocation87.manager.GamemodeManager;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,11 +9,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import com.github.glocation87.AdminToolPlugin;
+import com.github.glocation87.manager.GamemodeManager;
+import com.github.glocation87.manager.InventoryManager;
+
 public class StaffCommand implements CommandExecutor, Listener {
     private final AdminToolPlugin plugin;
     private final InventoryManager inventoryManager;
     private final GamemodeManager gamemodeManager;
-    
 
     public StaffCommand(AdminToolPlugin _plugin) {
         this.plugin = _plugin;
@@ -43,11 +42,10 @@ public class StaffCommand implements CommandExecutor, Listener {
     }
 
     private void enableStaffMode(Player player) {
-        plugin.setPlayerStaffMode(player, true);
         gamemodeManager.enableStaffGamemode(player);
         inventoryManager.cachePlayerInventory(player);
         inventoryManager.applyModerationTools(player);
-
+        plugin.setPlayerStaffMode(player, true);
         player.sendMessage(ChatColor.GREEN + "You have entered staff mode.");
     }
 
@@ -65,5 +63,4 @@ public class StaffCommand implements CommandExecutor, Listener {
         inventoryManager.clearPlayerCache(player.getUniqueId());
     }
 
-    
 }
