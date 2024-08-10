@@ -1,6 +1,8 @@
 package com.github.glocation87.manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,11 +30,14 @@ public class InventoryManager {
     private ItemStack createCustomItem(Material material, String name, String id, ChatColor color, boolean enchant) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
+        List<String> lore = new ArrayList<>();
+        lore.add(" ");
         meta.setDisplayName(color + "§l" + name);
         if (enchant == true) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
+        meta.setLore(lore);
         NamespacedKey key = new NamespacedKey(plugin, "staff_item");
         meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, id);
         item.setItemMeta(meta);
@@ -86,10 +91,5 @@ public class InventoryManager {
     public void applyModerationTools(Player player) {
         player.getInventory().setItem(0,
                 createCustomItem(Material.ENCHANTED_BOOK, "Player List", "player_list", ChatColor.LIGHT_PURPLE, true));
-        player.getInventory().setItem(1,
-                createCustomItem(Material.DIAMOND_PICKAXE, "Moderation Tool", "moderation_tool", ChatColor.GREEN,
-                        true));
-        player.getInventory().setItem(2,
-                createCustomItem(Material.COMPASS, "Teleport", "teleport", ChatColor.AQUA, false));
     }
 }

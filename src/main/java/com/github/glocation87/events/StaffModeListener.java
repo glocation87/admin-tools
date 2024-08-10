@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.github.glocation87.AdminToolPlugin;
 import com.github.glocation87.manager.PlayerListManager;
+import com.github.glocation87.manager.PlayerProfileManager;
 import com.github.glocation87.util.CustomInventoryHolder;
 
 public class StaffModeListener implements Listener {
@@ -114,9 +115,16 @@ public class StaffModeListener implements Listener {
                     event.setCancelled(true);
                 } else if (holder instanceof CustomInventoryHolder) {
                     CustomInventoryHolder inventoryHolder = (CustomInventoryHolder) holder;
-                    if ("player_list".equals(inventoryHolder.getIdentifier())) {
-                        int slot = event.getRawSlot();
-                        PlayerListManager.handleInventoryClick(player, holder, slot);
+                    int slot = event.getRawSlot();
+                    switch(inventoryHolder.getIdentifier()) {
+                        case "player_list":
+                            PlayerListManager.handleInventoryClick(player, holder, slot);
+                            break;
+                        case "player_main_menu":
+                            PlayerProfileManager.handlePlayerMenuClick(player, holder, slot);
+                            break;
+                        default:
+                            break;
                     }
                     event.setCancelled(true); // Prevent clicks in custom inventory slots from affecting other inventories
                 } else {

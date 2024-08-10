@@ -64,15 +64,13 @@ public class AdminToolPlugin extends JavaPlugin {
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(key, PersistentDataType.STRING)) {
                 String id = container.get(key, PersistentDataType.STRING);
-                return id.equals("player_list")
-                        || id.equals("moderation_tool")
-                        || id.equals("teleport");
+                return id.equals("player_list");
             }
         }
         return false;
     }
 
-    public String getItemId(ItemStack item) {
+    public String getItemId(ItemStack item) { 
         if (isStaffItem(item)) {
             NamespacedKey key = new NamespacedKey(this, "staff_item");
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
