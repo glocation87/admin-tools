@@ -1,0 +1,13 @@
+{
+  "name": "admintools-testbot",
+  "private": true,
+  "description": "Dummy players and automated checks for AdminTools",
+  "scripts": {
+    "seed": "node seed.js",
+    "target": "node target.js",
+    "selftest": "node selftest.js"
+  },
+  "dependencies": {
+    "mineflayer": "^4.39.0"
+  }
+}
