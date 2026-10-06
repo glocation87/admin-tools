@@ -1,0 +1,19 @@
+name: AdminTools
+version: '${version}'
+main: io.github.glocation87.admintools.AdminToolsPlugin
+api-version: '26.2'
+description: Staff mode, moderation and server debugging through chest menus.
+author: glocation87
+
+permissions:
+  admintools.staff:
+    description: Enter staff mode and use the moderation tools.
+    default: op
+  admintools.admin:
+    description: Server dashboard, tick control, plugin toggles and other dangerous tools.
+    default: op
+    children:
+      admintools.staff: true
+  admintools.vanish.see:
+    description: See vanished staff.
+    default: op

@@ -1,0 +1,22 @@
+staff-mode:
+  # gamemode while in staff mode, CREATIVE or SPECTATOR
+  gamemode: CREATIVE
+  vanish-on-enter: true
+  fly: true
+  # ticks between dashboard and live menu refreshes
+  refresh-ticks: 20
+
+freeze:
+  # commands a frozen player may still run, without the slash
+  allowed-commands:
+    - msg
+    - tell
+    - r
+    - helpop
+
+mute:
+  default-duration: 30m
+
+hot-chunks:
+  # chunks shown in the lag finder
+  count: 21
