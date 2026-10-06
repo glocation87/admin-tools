@@ -1,5 +1,6 @@
 package io.github.glocation87.admintools;
 
+import io.github.glocation87.admintools.command.AdminCommands;
 import io.github.glocation87.admintools.data.DataStore;
 import io.github.glocation87.admintools.debug.Diagnostics;
 import io.github.glocation87.admintools.debug.ServerStats;
@@ -63,6 +64,7 @@ public class AdminToolsPlugin extends JavaPlugin {
             menus.tick();
             vanish.tick();
         }, settings.refreshTicks(), settings.refreshTicks());
+        new AdminCommands(this).register();
     }
 
     @Override
