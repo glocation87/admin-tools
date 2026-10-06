@@ -54,7 +54,7 @@ public final class NotesMenu extends ListMenu<StaffNote> {
             }));
     }
 
-    static List<String> wrap(String text) {
+    public static List<String> wrap(String text) {
         List<String> lines = new ArrayList<>();
         StringBuilder line = new StringBuilder();
         for (String word : text.split(" ")) {

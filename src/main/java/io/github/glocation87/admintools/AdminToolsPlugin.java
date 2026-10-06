@@ -1,6 +1,8 @@
 package io.github.glocation87.admintools;
 
 import io.github.glocation87.admintools.data.DataStore;
+import io.github.glocation87.admintools.debug.Diagnostics;
+import io.github.glocation87.admintools.debug.ServerStats;
 import io.github.glocation87.admintools.menu.ChatPrompt;
 import io.github.glocation87.admintools.menu.MenuService;
 import io.github.glocation87.admintools.staff.ChatControl;
@@ -30,6 +32,8 @@ public class AdminToolsPlugin extends JavaPlugin {
     private PunishmentService punishments;
     private ChatControl chatControl;
     private StaffModeService staffMode;
+    private ServerStats stats;
+    private Diagnostics diagnostics;
 
     @Override
     public void onEnable() {
@@ -48,11 +52,14 @@ public class AdminToolsPlugin extends JavaPlugin {
         punishments = new PunishmentService(this);
         chatControl = new ChatControl(this);
         staffMode = new StaffModeService(this, new StaffItems(this), vanish, commandSpy, staffChat);
+        stats = new ServerStats();
+        diagnostics = new Diagnostics(new File(getDataFolder(), "dumps"));
 
         for (Listener listener : new Listener[] {menus, prompts, staffChat, commandSpy, freeze, mutes, chatControl, new StaffListener(this)}) {
             getServer().getPluginManager().registerEvents(listener, this);
         }
         getServer().getScheduler().runTaskTimer(this, () -> {
+            stats.sample();
             menus.tick();
             vanish.tick();
         }, settings.refreshTicks(), settings.refreshTicks());
@@ -119,5 +126,13 @@ public class AdminToolsPlugin extends JavaPlugin {
 
     public StaffModeService staffMode() {
         return staffMode;
+    }
+
+    public ServerStats stats() {
+        return stats;
+    }
+
+    public Diagnostics diagnostics() {
+        return diagnostics;
     }
 }

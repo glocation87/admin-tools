@@ -6,6 +6,7 @@ import io.github.glocation87.admintools.menu.Menu;
 import io.github.glocation87.admintools.menu.players.PeekMenu;
 import io.github.glocation87.admintools.menu.players.PlayerListMenu;
 import io.github.glocation87.admintools.menu.players.PlayerMenu;
+import io.github.glocation87.admintools.menu.server.DashboardMenu;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +90,13 @@ public final class StaffListener implements Listener {
             case RANDOM_TP -> randomTeleport(player);
             case COMMAND_SPY -> plugin.commandSpy().toggle(player);
             case EXIT -> plugin.staffMode().exit(player);
+            case DASHBOARD -> {
+                if (player.hasPermission("admintools.admin")) {
+                    new DashboardMenu(plugin, player).open();
+                } else {
+                    Text.send(player, "<red>The dashboard needs admintools.admin.");
+                }
+            }
             default -> {
             }
         }
