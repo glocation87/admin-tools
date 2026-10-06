@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Durations {
-    private static final Pattern PART = Pattern.compile("(\d+)([smhdw])");
+    private static final Pattern PART = Pattern.compile("([0-9]+)([smhdw])");
 
     private Durations() {
     }
