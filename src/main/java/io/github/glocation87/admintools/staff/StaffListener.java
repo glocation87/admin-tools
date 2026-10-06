@@ -222,8 +222,12 @@ public final class StaffListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        plugin.staffMode().restoreCrashed(event.getPlayer());
-        plugin.vanish().handleJoin(event.getPlayer());
+        Player player = event.getPlayer();
+        if (player.getAddress() != null && player.getAddress().getAddress() != null) {
+            plugin.data().recordAddress(player.getUniqueId(), player.getAddress().getAddress().getHostAddress());
+        }
+        plugin.staffMode().restoreCrashed(player);
+        plugin.vanish().handleJoin(player);
     }
 
     @EventHandler

@@ -5,11 +5,10 @@ import io.github.glocation87.admintools.Durations;
 import io.github.glocation87.admintools.Text;
 import io.github.glocation87.admintools.menu.Icons;
 import io.github.glocation87.admintools.menu.Menu;
-import java.time.Duration;
+import io.github.glocation87.admintools.data.Punishment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -70,12 +69,12 @@ public final class PlayerMenu extends Menu {
                     message("<red>They already left.");
                     return;
                 }
-                target.kick(Text.mm("<red>You were kicked.\n<gray>" + Text.escape(reason)));
-                plugin.staffChat().notice("<yellow>" + viewer.getName() + " <gray>kicked <yellow>" + target.getName() + "<gray>: <white>"
-                    + Text.escape(reason), null);
+                plugin.punishments().kick(target, reason, viewer);
                 message("<green>Kicked <white>" + target.getName());
             }));
-        button(22, Icons.of(Material.ANVIL, "<dark_red>Ban", "Asks for a duration and a reason"), this::ban);
+        button(22, Icons.of(Material.ANVIL, "<dark_red>Punish", "Mutes and bans by offense category,", "warnings, history and notes",
+            "Record: <white>" + plugin.data().history(target.getUniqueId()).size() + " entries"),
+            () -> new PunishMenu(plugin, viewer, this, target).open());
         button(23, Icons.of(Material.SKELETON_SKULL, "<red>Kill"), () ->
             confirm("<red>Kill " + target.getName() + "?", Icons.of(Material.SKELETON_SKULL, "<red>Kill " + target.getName()), () -> {
                 target.setHealth(0);
@@ -129,6 +128,8 @@ public final class PlayerMenu extends Menu {
             target.teleportAsync(target.getWorld().getSpawnLocation());
             message("<green>Sent <white>" + target.getName() + " <green>to spawn");
         });
+        button(34, Icons.of(Material.BOOK, "<aqua>History", "Warns, kicks, mutes and bans",
+            "Entries: <white>" + plugin.data().history(target.getUniqueId()).size()), () -> new HistoryMenu(plugin, viewer, this, target).open());
     }
 
     private List<String> summary() {
@@ -160,30 +161,8 @@ public final class PlayerMenu extends Menu {
             return;
         }
         plugin.prompts().ask(viewer, "<gray>Reason for muting <white>" + target.getName() + "<gray>?", reason -> {
-            plugin.mutes().mute(target, plugin.settings().defaultMute(), reason, viewer.getName());
+            plugin.punishments().mute(target, plugin.settings().defaultMute(), reason, viewer, Punishment.Category.CHAT, 0);
             open();
-        });
-    }
-
-    private void ban() {
-        plugin.prompts().ask(viewer, "<gray>How long? <white>30m, 2h, 7d <gray>or <white>perm", input -> {
-            Duration duration;
-            try {
-                duration = Durations.parse(input);
-            } catch (IllegalArgumentException e) {
-                message("<red>That is not a duration.");
-                return;
-            }
-            plugin.prompts().ask(viewer, "<gray>Reason for the ban?", reason -> {
-                Component screen = Text.mm("<red>You are banned for " + Durations.format(duration) + ".\n<gray>" + Text.escape(reason));
-                target.ban(reason, duration, viewer.getName());
-                if (target.isOnline()) {
-                    target.kick(screen);
-                }
-                plugin.staffChat().notice("<yellow>" + viewer.getName() + " <gray>banned <yellow>" + target.getName() + " <gray>for "
-                    + Durations.format(duration) + ": <white>" + Text.escape(reason), null);
-                message("<green>Banned <white>" + target.getName());
-            });
         });
     }
 

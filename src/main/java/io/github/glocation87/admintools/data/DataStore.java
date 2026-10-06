@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +25,9 @@ public final class DataStore {
     private final Set<UUID> frozen = new HashSet<>();
     private final Map<UUID, List<StaffNote>> notes = new HashMap<>();
     private final Map<UUID, StaffSnapshot> snapshots = new HashMap<>();
+    private final Map<UUID, List<Punishment>> history = new HashMap<>();
+    private final Map<UUID, Report> reports = new LinkedHashMap<>();
+    private final Map<UUID, Set<String>> addresses = new HashMap<>();
 
     public DataStore(File file, Logger log) {
         this.file = file;
@@ -33,6 +39,9 @@ public final class DataStore {
         frozen.clear();
         notes.clear();
         snapshots.clear();
+        history.clear();
+        reports.clear();
+        addresses.clear();
         if (!file.exists()) {
             return;
         }
@@ -52,7 +61,7 @@ public final class DataStore {
             for (String key : noteSection.getKeys(false)) {
                 List<StaffNote> list = new ArrayList<>();
                 for (Map<?, ?> raw : noteSection.getMapList(key)) {
-                    list.add(new StaffNote(String.valueOf(raw.get("author")), ((Number) raw.get("time")).longValue(), String.valueOf(raw.get("text"))));
+                    list.add(new StaffNote(String.valueOf(raw.get("author")), number(raw.get("time")), String.valueOf(raw.get("text"))));
                 }
                 notes.put(UUID.fromString(key), list);
             }
@@ -67,6 +76,36 @@ public final class DataStore {
                 }
             }
         }
+        ConfigurationSection historySection = yaml.getConfigurationSection("history");
+        if (historySection != null) {
+            for (String key : historySection.getKeys(false)) {
+                List<Punishment> list = new ArrayList<>();
+                for (Map<?, ?> raw : historySection.getMapList(key)) {
+                    list.add(new Punishment(
+                        Punishment.Type.valueOf(String.valueOf(raw.get("type")).toUpperCase(Locale.ROOT)),
+                        Punishment.Category.valueOf(String.valueOf(raw.get("category")).toUpperCase(Locale.ROOT)),
+                        (int) number(raw.get("severity")), String.valueOf(raw.get("by")), number(raw.get("time")),
+                        number(raw.get("expires")), String.valueOf(raw.get("reason"))));
+                }
+                history.put(UUID.fromString(key), list);
+            }
+        }
+        for (Map<?, ?> raw : yaml.getMapList("reports")) {
+            Report report = new Report(UUID.fromString(String.valueOf(raw.get("id"))), UUID.fromString(String.valueOf(raw.get("reporter"))),
+                String.valueOf(raw.get("reporter-name")), UUID.fromString(String.valueOf(raw.get("target"))),
+                String.valueOf(raw.get("target-name")), String.valueOf(raw.get("reason")), number(raw.get("time")));
+            reports.put(report.id(), report);
+        }
+        ConfigurationSection addressSection = yaml.getConfigurationSection("addresses");
+        if (addressSection != null) {
+            for (String key : addressSection.getKeys(false)) {
+                addresses.put(UUID.fromString(key), new LinkedHashSet<>(addressSection.getStringList(key)));
+            }
+        }
+    }
+
+    private static long number(Object value) {
+        return value instanceof Number number ? number.longValue() : 0;
     }
 
     public void save() {
@@ -85,7 +124,7 @@ public final class DataStore {
         for (Map.Entry<UUID, List<StaffNote>> entry : notes.entrySet()) {
             List<Map<String, Object>> list = new ArrayList<>();
             for (StaffNote note : entry.getValue()) {
-                Map<String, Object> raw = new HashMap<>();
+                Map<String, Object> raw = new LinkedHashMap<>();
                 raw.put("author", note.author());
                 raw.put("time", note.time());
                 raw.put("text", note.text());
@@ -95,6 +134,37 @@ public final class DataStore {
         }
         for (Map.Entry<UUID, StaffSnapshot> entry : snapshots.entrySet()) {
             entry.getValue().write(yaml.createSection("snapshots." + entry.getKey()));
+        }
+        for (Map.Entry<UUID, List<Punishment>> entry : history.entrySet()) {
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (Punishment punishment : entry.getValue()) {
+                Map<String, Object> raw = new LinkedHashMap<>();
+                raw.put("type", punishment.type().name());
+                raw.put("category", punishment.category().name());
+                raw.put("severity", punishment.severity());
+                raw.put("by", punishment.by());
+                raw.put("time", punishment.time());
+                raw.put("expires", punishment.expiresAt());
+                raw.put("reason", punishment.reason());
+                list.add(raw);
+            }
+            yaml.set("history." + entry.getKey(), list);
+        }
+        List<Map<String, Object>> reportList = new ArrayList<>();
+        for (Report report : reports.values()) {
+            Map<String, Object> raw = new LinkedHashMap<>();
+            raw.put("id", report.id().toString());
+            raw.put("reporter", report.reporter().toString());
+            raw.put("reporter-name", report.reporterName());
+            raw.put("target", report.target().toString());
+            raw.put("target-name", report.targetName());
+            raw.put("reason", report.reason());
+            raw.put("time", report.time());
+            reportList.add(raw);
+        }
+        yaml.set("reports", reportList);
+        for (Map.Entry<UUID, Set<String>> entry : addresses.entrySet()) {
+            yaml.set("addresses." + entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         try {
             file.getParentFile().mkdirs();
@@ -169,5 +239,61 @@ public final class DataStore {
         if (snapshots.remove(id) != null) {
             save();
         }
+    }
+
+    public List<Punishment> history(UUID id) {
+        return Collections.unmodifiableList(history.getOrDefault(id, List.of()));
+    }
+
+    public void addPunishment(UUID id, Punishment punishment) {
+        history.computeIfAbsent(id, key -> new ArrayList<>()).add(punishment);
+        save();
+    }
+
+    public void removePunishment(UUID id, Punishment punishment) {
+        List<Punishment> list = history.get(id);
+        if (list != null && list.remove(punishment)) {
+            if (list.isEmpty()) {
+                history.remove(id);
+            }
+            save();
+        }
+    }
+
+    public List<Report> reports() {
+        return List.copyOf(reports.values());
+    }
+
+    public void addReport(Report report) {
+        reports.put(report.id(), report);
+        save();
+    }
+
+    public void removeReport(UUID id) {
+        if (reports.remove(id) != null) {
+            save();
+        }
+    }
+
+    public void recordAddress(UUID id, String address) {
+        if (addresses.computeIfAbsent(id, key -> new LinkedHashSet<>()).add(address)) {
+            save();
+        }
+    }
+
+    public Set<String> addresses(UUID id) {
+        return Collections.unmodifiableSet(addresses.getOrDefault(id, Set.of()));
+    }
+
+    // Everyone who ever shared an address with this player
+    public Set<UUID> alts(UUID id) {
+        Set<String> own = addresses(id);
+        Set<UUID> alts = new LinkedHashSet<>();
+        for (Map.Entry<UUID, Set<String>> entry : addresses.entrySet()) {
+            if (!entry.getKey().equals(id) && !Collections.disjoint(own, entry.getValue())) {
+                alts.add(entry.getKey());
+            }
+        }
+        return alts;
     }
 }

@@ -15,7 +15,23 @@ freeze:
     - helpop
 
 mute:
+  # used by the quick mute button and /mute without a duration
   default-duration: 30m
+
+punish:
+  # severity 1, 2 and 3 for each offense category in the punish menu
+  chat:
+    - 1h
+    - 1d
+    - 7d
+  gameplay:
+    - 1d
+    - 7d
+    - 30d
+  # every earlier mute or ban in the same category multiplies the length by this
+  escalation: 2
+  # that many earlier offenses in a category and the next one is permanent
+  perm-after: 4
 
 hot-chunks:
   # chunks shown in the lag finder

@@ -3,9 +3,11 @@ package io.github.glocation87.admintools;
 import io.github.glocation87.admintools.data.DataStore;
 import io.github.glocation87.admintools.menu.ChatPrompt;
 import io.github.glocation87.admintools.menu.MenuService;
+import io.github.glocation87.admintools.staff.ChatControl;
 import io.github.glocation87.admintools.staff.CommandSpy;
 import io.github.glocation87.admintools.staff.FreezeService;
 import io.github.glocation87.admintools.staff.MuteService;
+import io.github.glocation87.admintools.staff.PunishmentService;
 import io.github.glocation87.admintools.staff.StaffChat;
 import io.github.glocation87.admintools.staff.StaffItems;
 import io.github.glocation87.admintools.staff.StaffListener;
@@ -25,6 +27,8 @@ public class AdminToolsPlugin extends JavaPlugin {
     private VanishService vanish;
     private FreezeService freeze;
     private MuteService mutes;
+    private PunishmentService punishments;
+    private ChatControl chatControl;
     private StaffModeService staffMode;
 
     @Override
@@ -41,9 +45,11 @@ public class AdminToolsPlugin extends JavaPlugin {
         vanish = new VanishService(this);
         freeze = new FreezeService(this);
         mutes = new MuteService(this);
+        punishments = new PunishmentService(this);
+        chatControl = new ChatControl(this);
         staffMode = new StaffModeService(this, new StaffItems(this), vanish, commandSpy, staffChat);
 
-        for (Listener listener : new Listener[] {menus, prompts, staffChat, commandSpy, freeze, mutes, new StaffListener(this)}) {
+        for (Listener listener : new Listener[] {menus, prompts, staffChat, commandSpy, freeze, mutes, chatControl, new StaffListener(this)}) {
             getServer().getPluginManager().registerEvents(listener, this);
         }
         getServer().getScheduler().runTaskTimer(this, () -> {
@@ -101,6 +107,14 @@ public class AdminToolsPlugin extends JavaPlugin {
 
     public MuteService mutes() {
         return mutes;
+    }
+
+    public PunishmentService punishments() {
+        return punishments;
+    }
+
+    public ChatControl chatControl() {
+        return chatControl;
     }
 
     public StaffModeService staffMode() {
