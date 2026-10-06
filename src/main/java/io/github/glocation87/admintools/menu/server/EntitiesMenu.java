@@ -58,7 +58,7 @@ public final class EntitiesMenu extends ListMenu<EntitiesMenu.Count> {
         return counts;
     }
 
-    static Material iconFor(EntityType type) {
+    public static Material iconFor(EntityType type) {
         Material egg = Material.matchMaterial(type.getKey().getKey() + "_spawn_egg");
         if (egg != null) {
             return egg;

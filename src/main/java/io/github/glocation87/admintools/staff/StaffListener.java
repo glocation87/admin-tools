@@ -2,6 +2,8 @@ package io.github.glocation87.admintools.staff;
 
 import io.github.glocation87.admintools.AdminToolsPlugin;
 import io.github.glocation87.admintools.Text;
+import io.github.glocation87.admintools.inspect.BlockInspectMenu;
+import io.github.glocation87.admintools.inspect.EntityInspectMenu;
 import io.github.glocation87.admintools.menu.Menu;
 import io.github.glocation87.admintools.menu.players.PeekMenu;
 import io.github.glocation87.admintools.menu.players.PlayerListMenu;
@@ -90,6 +92,11 @@ public final class StaffListener implements Listener {
             case RANDOM_TP -> randomTeleport(player);
             case COMMAND_SPY -> plugin.commandSpy().toggle(player);
             case EXIT -> plugin.staffMode().exit(player);
+            case INSPECTOR -> {
+                if (block != null) {
+                    new BlockInspectMenu(plugin, player, null, block).open();
+                }
+            }
             case DASHBOARD -> {
                 if (player.hasPermission("admintools.admin")) {
                     new DashboardMenu(plugin, player).open();
@@ -117,6 +124,13 @@ public final class StaffListener implements Listener {
             case PLAYER_LIST -> {
                 if (target instanceof Player other) {
                     new PlayerMenu(plugin, player, null, other).open();
+                }
+            }
+            case INSPECTOR -> {
+                if (target instanceof Player other) {
+                    new PlayerMenu(plugin, player, null, other).open();
+                } else {
+                    new EntityInspectMenu(plugin, player, null, target).open();
                 }
             }
             default -> {
